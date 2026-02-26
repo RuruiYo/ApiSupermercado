@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.13.35806.99 d17.13
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ApiSupermercado", "ApiSupermercado\ApiSupermercado.csproj", "{CA645CE6-C4AC-4998-A525-B098FB913CD9}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{CA645CE6-C4AC-4998-A525-B098FB913CD9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CA645CE6-C4AC-4998-A525-B098FB913CD9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CA645CE6-C4AC-4998-A525-B098FB913CD9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CA645CE6-C4AC-4998-A525-B098FB913CD9}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {7F009053-53EB-42FA-A3C1-8A380A794E88}
+	EndGlobalSection
+EndGlobal
