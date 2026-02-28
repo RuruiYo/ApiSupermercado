@@ -7,22 +7,19 @@ namespace SupermercadoAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(Roles = "Administrador")]
     public class ProveedoresController : ControllerBase
     {
         private readonly ProveedorService _service;
-
-        public ProveedoresController(ProveedorService service)
-        {
-            _service = service;
-        }
+        public ProveedoresController(ProveedorService service) { _service = service; }
 
         // GET api/proveedores
         [HttpGet]
+        [Authorize(Roles = "Administrador,Bodeguero")]
         public IActionResult GetProveedores() => Ok(_service.GetTodos());
 
         // GET api/proveedores/5
         [HttpGet("{id}")]
+        [Authorize(Roles = "Administrador,Bodeguero")]
         public IActionResult GetProveedor(int id)
         {
             var (exito, mensaje, datos) = _service.GetPorId(id);
@@ -30,9 +27,20 @@ namespace SupermercadoAPI.Controllers
             return Ok(datos);
         }
 
+        // POST api/proveedores  → solo Admin
+        [HttpPost]
+        [Authorize(Roles = "Administrador")]
+        public IActionResult CreateProveedor([FromBody] ProveedorCreateDto dto)
+        {
+            var (exito, mensaje, id) = _service.Crear(dto);
+            if (!exito) return Conflict(new { mensaje });
+            return CreatedAtAction(nameof(GetProveedor), new { id }, new { mensaje, id });
+        }
+
         // PATCH api/proveedores/5/estado
         [HttpPatch("{id}/estado")]
-        public IActionResult CambiarEstado(int id, ProveedorEstadoDto dto)
+        [Authorize(Roles = "Administrador")]
+        public IActionResult CambiarEstado(int id, [FromBody] ProveedorEstadoDto dto)
         {
             var (exito, mensaje) = _service.CambiarEstado(id, dto.EstadoActivo);
             if (!exito) return NotFound(new { mensaje });
