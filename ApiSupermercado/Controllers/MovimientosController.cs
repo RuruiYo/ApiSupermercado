@@ -22,6 +22,21 @@ namespace SupermercadoAPI.Controllers
         [Authorize(Roles = "Administrador")]
         public IActionResult GetMovimientos() => Ok(_service.GetTodos());
 
+        // POST api/movimientos/entrada
+        [HttpPost("entrada")]
+        [Authorize(Roles = "Bodeguero")]
+        public IActionResult RegistrarEntrada(EntradaDto dto)
+        {
+            var idUsuario = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+            var result = _service.RegistrarEntrada(dto, idUsuario);
+            if (!result.Exito)
+            {
+                if (result.Mensaje.Contains("No se encontró")) return NotFound(new { result.Mensaje });
+                return BadRequest(new { result.Mensaje });
+            }
+            return Ok(new { result.Mensaje, result.ID });
+        }
+
         // POST api/movimientos/traslado
         [HttpPost("traslado")]
         [Authorize(Roles = "Bodeguero")]

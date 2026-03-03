@@ -135,5 +135,7 @@ namespace SupermercadoAPI.Services
                 Subtotal = d.CantidadPedida * d.PrecioAlMomento
             }).ToList()
         };
+
+
     }
 }

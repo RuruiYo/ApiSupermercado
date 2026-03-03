@@ -38,7 +38,13 @@ namespace SupermercadoAPI.DTOs.Lotes
         public int UnidadesEnBodega { get; set; }
         public int UnidadesEnEstante { get; set; }
         public int UnidadesVendidas { get; set; }
-        public string NombreProducto { get; set; } = string.Empty;
-        public string NombreProveedor { get; set; } = string.Empty;
+        public int UnidadesDescartadas { get; set; }  // NUEVO
+        public string   NombreProducto   { get; set; } = string.Empty;
+        public string   NombreProveedor  { get; set; } = string.Empty;
+        // Ubicacion tomada del producto (no de inventario_lotes)
+        public string   NombreUbicacion  { get; set; } = string.Empty;
+        // Precio y valor total del lote (CantidadOriginal * PrecioVenta)
+        public decimal  PrecioVenta      { get; set; }
+        public decimal  ValorTotalLote   { get; set; }
     }
 }

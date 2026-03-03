@@ -8,16 +8,18 @@ namespace SupermercadoAPI.Models
         [Key]
         public int ID_Lote { get; set; }
         public string CodigoLoteFisico { get; set; } = string.Empty;
-        public DateOnly FechaProduccion { get; set; }
+        public DateOnly FechaProduccion  { get; set; }
         public DateOnly FechaVencimiento { get; set; }
         public DateTime FechaIngreso { get; set; } = DateTime.Now;
-        public int CantidadOriginal { get; set; }
-        public int UnidadesEnBodega { get; set; } = 0;
-        public int UnidadesEnEstante { get; set; } = 0;
-        public int UnidadesVendidas { get; set; } = 0;
-        public int ID_Producto { get; set; }
-        public int ID_Proveedor { get; set; }
-        public int ID_Usuario_Recibio { get; set; }
+        public int CantidadOriginal      { get; set; }
+        public int UnidadesEnBodega      { get; set; }
+        public int UnidadesEnEstante     { get; set; }
+        public int UnidadesVendidas      { get; set; }
+        public int UnidadesDescartadas   { get; set; }  // NUEVO
+
+        public int ID_Producto       { get; set; }
+        public int ID_Proveedor      { get; set; }
+        public int ID_Usuario_Recibio{ get; set; }
 
         [ForeignKey("ID_Producto")]
         public Producto? Producto { get; set; }

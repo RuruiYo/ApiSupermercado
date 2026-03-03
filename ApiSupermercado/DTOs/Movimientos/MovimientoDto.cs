@@ -2,6 +2,20 @@ using System.ComponentModel.DataAnnotations;
 
 namespace SupermercadoAPI.DTOs.Movimientos
 {
+    public class EntradaDto
+    {
+        [Required(ErrorMessage = "El lote es obligatorio.")]
+        [Range(1, int.MaxValue, ErrorMessage = "Debe seleccionar un lote válido.")]
+        public int ID_Lote { get; set; }
+
+        [Required(ErrorMessage = "La cantidad es obligatoria.")]
+        [Range(1, int.MaxValue, ErrorMessage = "La cantidad debe ser mayor a 0.")]
+        public int Cantidad { get; set; }
+
+        [MaxLength(500, ErrorMessage = "Las observaciones no pueden superar 500 caracteres.")]
+        public string? Observaciones { get; set; }
+    }
+
     public class TrasladoDto
     {
         [Required(ErrorMessage = "El lote es obligatorio.")]

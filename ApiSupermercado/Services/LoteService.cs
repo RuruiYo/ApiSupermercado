@@ -17,7 +17,7 @@ namespace SupermercadoAPI.Services
         public List<LoteResponseDto> GetTodos()
         {
             return _context.Inventario_Lotes
-                .Include(l => l.Producto)
+                .Include(l => l.Producto).ThenInclude(p => p!.Ubicacion)
                 .Include(l => l.Proveedor)
                 .Select(l => MapToDto(l)).ToList();
         }
@@ -28,7 +28,7 @@ namespace SupermercadoAPI.Services
                 return (false, $"No se encontró el producto con ID {idProducto}.", null);
 
             var lotes = _context.Inventario_Lotes
-                .Include(l => l.Producto)
+                .Include(l => l.Producto).ThenInclude(p => p!.Ubicacion)
                 .Include(l => l.Proveedor)
                 .Where(l => l.ID_Producto == idProducto)
                 .Select(l => MapToDto(l)).ToList();
@@ -102,11 +102,15 @@ namespace SupermercadoAPI.Services
             FechaVencimiento = l.FechaVencimiento,
             FechaIngreso = l.FechaIngreso,
             CantidadOriginal = l.CantidadOriginal,
-            UnidadesEnBodega = l.UnidadesEnBodega,
+            UnidadesEnBodega  = l.UnidadesEnBodega,
             UnidadesEnEstante = l.UnidadesEnEstante,
-            UnidadesVendidas = l.UnidadesVendidas,
-            NombreProducto = l.Producto!.NombreProducto,
-            NombreProveedor = l.Proveedor!.NombreEmpresa
+            UnidadesVendidas  = l.UnidadesVendidas,
+            UnidadesDescartadas = l.UnidadesDescartadas,
+            NombreProducto  = l.Producto!.NombreProducto,
+            NombreProveedor = l.Proveedor!.NombreEmpresa,
+            NombreUbicacion = l.Producto.Ubicacion != null ? l.Producto.Ubicacion.NombreUbicacion : "Sin ubicacion",
+            PrecioVenta     = l.Producto.PrecioVenta,
+            ValorTotalLote  = l.CantidadOriginal * l.Producto.PrecioVenta
         };
     }
 }

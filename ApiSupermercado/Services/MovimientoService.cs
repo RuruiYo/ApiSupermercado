@@ -34,6 +34,50 @@ namespace SupermercadoAPI.Services
                 }).ToList();
         }
 
+        // ════════════════════════════════════════════════════════════════════════════════
+        // NUEVO: Registrar Entrada de Productos
+        // ════════════════════════════════════════════════════════════════════════════════
+        public (bool Exito, string Mensaje, int ID) RegistrarEntrada(EntradaDto dto, int idUsuario)
+        {
+            var lote = _context.Inventario_Lotes
+                .Include(l => l.Producto)
+                .FirstOrDefault(l => l.ID_Lote == dto.ID_Lote);
+
+            if (lote == null)
+                return (false, $"No se encontró el lote con ID {dto.ID_Lote}.", 0);
+
+            // Validar que la cantidad registrada no supere la original del lote
+            int totalActual = lote.UnidadesEnBodega + lote.UnidadesEnEstante + lote.UnidadesVendidas;
+            if (totalActual + dto.Cantidad > lote.CantidadOriginal)
+                return (false, $"La cantidad supera el total original del lote ({lote.CantidadOriginal}). Disponible: {lote.CantidadOriginal - totalActual} unidades.", 0);
+
+            // Actualizar inventario del lote
+            lote.UnidadesEnBodega += dto.Cantidad;
+
+            // Actualizar stock general del producto
+            lote.Producto!.Stock_Bodega_Total += dto.Cantidad;
+
+            // Registrar el movimiento en el historial
+            var movimiento = new HistorialMovimiento
+            {
+                TipoMovimiento = "ENTRADA_LOTE",
+                CantidadMovida = dto.Cantidad,
+                Observaciones = dto.Observaciones ?? "Registro de entrada de lote",
+                ID_Producto = lote.ID_Producto,
+                ID_Lote_Afectado = lote.ID_Lote,
+                ID_Usuario_Responsable = idUsuario,
+                FechaHora = DateTime.Now
+            };
+
+            _context.Historial_Movimientos.Add(movimiento);
+            _context.SaveChanges();
+
+            return (true, $"Entrada registrada: {dto.Cantidad} unidades agregadas a bodega.", movimiento.ID_Movimiento);
+        }
+
+        // ════════════════════════════════════════════════════════════════════════════════
+        // Trasladar Unidades de Bodega a Estante
+        // ════════════════════════════════════════════════════════════════════════════════
         public (bool Exito, string Mensaje) Trasladar(TrasladoDto dto, int idUsuario)
         {
             var lote = _context.Inventario_Lotes
@@ -61,13 +105,17 @@ namespace SupermercadoAPI.Services
                 Observaciones = dto.Observaciones,
                 ID_Producto = lote.ID_Producto,
                 ID_Lote_Afectado = lote.ID_Lote,
-                ID_Usuario_Responsable = idUsuario
+                ID_Usuario_Responsable = idUsuario,
+                FechaHora = DateTime.Now
             });
 
             _context.SaveChanges();
             return (true, $"Traslado de {dto.Cantidad} unidades realizado correctamente.");
         }
 
+        // ════════════════════════════════════════════════════════════════════════════════
+        // Descartar Unidades
+        // ════════════════════════════════════════════════════════════════════════════════
         public (bool Exito, string Mensaje) Descartar(DescartarDto dto, int idUsuario)
         {
             var lote = _context.Inventario_Lotes
@@ -75,7 +123,7 @@ namespace SupermercadoAPI.Services
                 .FirstOrDefault(l => l.ID_Lote == dto.ID_Lote);
 
             if (lote == null)
-                return (false, $"No se encontró el lote con ID {dto.ID_Lote}.");
+                return (false, $"No se encontro el lote con ID {dto.ID_Lote}.");
 
             int totalDisponible = lote.UnidadesEnBodega + lote.UnidadesEnEstante;
             if (totalDisponible <= 0)
@@ -86,28 +134,37 @@ namespace SupermercadoAPI.Services
 
             int restante = dto.Cantidad;
 
+            // Descontar primero de bodega, luego de estante
             if (lote.UnidadesEnBodega >= restante)
             {
-                lote.UnidadesEnBodega -= restante;
-                lote.Producto!.Stock_Bodega_Total -= restante;
+                lote.UnidadesEnBodega             -= restante;
+                lote.Producto!.Stock_Bodega_Total  -= restante;
             }
             else
             {
-                restante -= lote.UnidadesEnBodega;
-                lote.Producto!.Stock_Bodega_Total -= lote.UnidadesEnBodega;
-                lote.UnidadesEnBodega = 0;
-                lote.UnidadesEnEstante -= restante;
-                lote.Producto.Stock_Estante_Total -= restante;
+                int deBodega  = lote.UnidadesEnBodega;
+                int deEstante = restante - deBodega;
+
+                lote.Producto!.Stock_Bodega_Total  -= deBodega;
+                lote.UnidadesEnBodega               = 0;
+
+                lote.UnidadesEnEstante             -= deEstante;
+                lote.Producto.Stock_Estante_Total  -= deEstante;
             }
+
+            // Acumular en UnidadesDescartadas (lote) y Stock_Descartado_Total (producto)
+            lote.UnidadesDescartadas              += dto.Cantidad;
+            lote.Producto!.Stock_Descartado_Total += dto.Cantidad;
 
             _context.Historial_Movimientos.Add(new HistorialMovimiento
             {
-                TipoMovimiento = "DESCARTE",
-                CantidadMovida = dto.Cantidad,
-                Observaciones = dto.Observaciones,
-                ID_Producto = lote.ID_Producto,
-                ID_Lote_Afectado = lote.ID_Lote,
-                ID_Usuario_Responsable = idUsuario
+                TipoMovimiento         = "DESCARTE",
+                CantidadMovida         = dto.Cantidad,
+                Observaciones          = dto.Observaciones,
+                ID_Producto            = lote.ID_Producto,
+                ID_Lote_Afectado       = lote.ID_Lote,
+                ID_Usuario_Responsable = idUsuario,
+                FechaHora              = DateTime.Now
             });
 
             _context.SaveChanges();
